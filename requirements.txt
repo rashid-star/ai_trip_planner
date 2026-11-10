@@ -2,17 +2,18 @@ langchain
 langchain-community
 langchain-experimental
 fastapi
-pydantic
 python-dotenv
+streamlit
 uvicorn
+pydantic
 httpx
 requests
-langchain-google-community
-langchain-tavily
-langchain-groq
-langchain-openai
-PyYAML
+langchain_google_community
+langchain_tavily
+langchain_groq
+langchain_openai
 langgraph
-streamlit
+langchain-google-community[places]
 
-# -e .
+
+-e .
