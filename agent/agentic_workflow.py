@@ -30,7 +30,7 @@ class GraphBuilder():
         self.graph = None
         
         self.system_prompt = SYSTEM_PROMPT
-    
+
     
     def agent_function(self,state: MessagesState):
         """Main agent function"""
@@ -51,3 +51,4 @@ class GraphBuilder():
         
     def __call__(self):
         return self.build_graph()
+    
