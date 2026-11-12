@@ -1,6 +1,6 @@
 
 from utils.model_loader import ModelLoader
-from prompt_library.prompt import SYSTEM_PROMPT
+from prompt_library.prompt import build_system_prompt
 from langgraph.graph import StateGraph, MessagesState, END, START
 from langgraph.prebuilt import ToolNode, tools_condition
 from tools.weather_info_tool import WeatherInfoTool
@@ -9,9 +9,12 @@ from tools.expense_calculater_tool import CalculatorTool
 from tools.currency_conversion_tool import CurrencyConverterTool
 
 class GraphBuilder():
-    def __init__(self,model_provider: str = "groq"):
+    def __init__(self, model_provider: str = "groq", response_length: str = "standard"):
         self.model_loader = ModelLoader(model_provider=model_provider)
-        self.llm = self.model_loader.load_llm()
+        token_limits = {"short": 1000, "standard": 1800, "detailed": 3000}
+        self.llm = self.model_loader.load_llm(
+            max_tokens=token_limits.get(response_length, token_limits["standard"])
+        )
         
         self.tools = []
         
@@ -29,7 +32,7 @@ class GraphBuilder():
         
         self.graph = None
         
-        self.system_prompt = SYSTEM_PROMPT
+        self.system_prompt = build_system_prompt(response_length)
 
     
     def agent_function(self,state: MessagesState):

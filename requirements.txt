@@ -9,11 +9,9 @@ pydantic
 httpx
 requests
 langchain-google-community[places]
-langchain_tavily
-langchain_groq
-langchain_openai
+langchain-tavily
+langchain-groq
+langchain-openai
 langgraph
-langchain-google-community[places]
-
-
+PyYAML
 # -e .
