@@ -18,5 +18,6 @@ current information. Return a clean Markdown itinerary:
 - One useful weather or transport note
 {limit}
 Clearly label estimates and say when live data is unavailable.
+Use plain Markdown only. Never output HTML tags such as <br>, <p>, or <div>.
 """
     )

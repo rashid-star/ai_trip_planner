@@ -4,6 +4,7 @@ from agent.agentic_workflow import GraphBuilder
 from starlette.responses import JSONResponse
 import logging
 import os
+import re
 import time
 from typing import Literal
 from uuid import uuid4
@@ -13,6 +14,13 @@ from pydantic import BaseModel
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("wanderly.api")
+
+
+def normalize_answer(answer: str) -> str:
+    """Convert model HTML line breaks to Markdown-friendly whitespace."""
+    answer = re.sub(r"<br\s*/?>", "\n", answer, flags=re.IGNORECASE)
+    answer = re.sub(r"</?(?:p|div)>", "\n", answer, flags=re.IGNORECASE)
+    return re.sub(r"\n{3,}", "\n\n", answer).strip()
 
 app = FastAPI()
 
@@ -63,6 +71,7 @@ async def query_travel_agent(query:QueryRequest):
             final_output = output["messages"][-1].content  # Last AI response
         else:
             final_output = str(output)
+        final_output = normalize_answer(final_output)
         
         latency_ms = round((time.perf_counter() - started_at) * 1000)
         logger.info(
