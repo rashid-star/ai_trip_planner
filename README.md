@@ -93,11 +93,54 @@ main.py           FastAPI backend
 
 ## Architecture and resume highlights
 
-1. FastAPI validates the request and assigns a request ID.
-2. `GraphBuilder` creates a LangGraph state graph with an agent node and a conditional tool node.
-3. The LangChain model selects weather, places, currency, or calculator tools when needed.
-4. The graph returns a concise itinerary with response-length-specific token limits.
-5. API logs capture request ID and latency, while optional LangSmith tracing captures the run and tool path.
+### End-to-end workflow
+
+```mermaid
+flowchart TD
+    A[User enters trip request] --> B[Streamlit frontend]
+    B -->|POST /query| C[FastAPI API]
+    C --> D[Validate question and response_length]
+    D --> E[Create request ID and start timer]
+    E --> F[GraphBuilder]
+    F --> G[LangGraph START]
+    G --> H[Agent node]
+    H --> I{Tool call required?}
+    I -->|Yes| J[LangChain ToolNode]
+    J --> K[Weather / Places / Tavily / Currency / Calculator]
+    K --> H
+    I -->|No| L[LangGraph END]
+    L --> M[Normalize Markdown output]
+    M --> N[Return answer, request ID, latency]
+    N --> O[Streamlit itinerary view]
+```
+
+### Pipeline steps
+
+1. The user submits a destination, duration, and preferences in the Streamlit UI.
+2. Streamlit sends `question` and the selected response style (`short`, `standard`, or `detailed`) to `POST /query`.
+3. FastAPI validates the request with Pydantic, generates a unique request ID, and starts a latency timer.
+4. `GraphBuilder` loads the configured Groq model and applies the response-specific token budget.
+5. LangGraph runs the agent node. The LangChain model decides whether external tools are needed.
+6. If a tool call is returned, the conditional edge routes execution to `ToolNode`.
+7. The selected LangChain tool runs and returns data to the agent node:
+   - Weather through OpenWeather
+   - Attractions, restaurants, activities, and transport through Google Places
+   - Tavily as a place-search fallback
+   - Currency conversion through ExchangeRate-API
+   - Expense calculations through local calculator tools
+8. The graph loops between the agent and tools until the model produces the final itinerary.
+9. FastAPI removes leaked HTML line-break tags, records latency, and returns the answer with observability metadata.
+10. Streamlit renders the Markdown itinerary and provides a download option.
+
+### LLMOps and observability
+
+- Response styles control prompt instructions and model token budgets.
+- Every request receives a `request_id` for debugging and correlation.
+- API logs record response style, latency, and failures.
+- LangGraph runs include a run name, response-style tags, and request metadata.
+- Optional LangSmith tracing can inspect graph nodes, tool calls, latency, and failures.
+
+This architecture demonstrates an agentic RAG-style workflow rather than a single LLM call: the model reasons over the request, conditionally invokes specialized tools, observes their results, and then produces a grounded response.
 
 ## Safety and data notes
 
