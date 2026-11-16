@@ -141,7 +141,3 @@ flowchart TD
 - Optional LangSmith tracing can inspect graph nodes, tool calls, latency, and failures.
 
 This architecture demonstrates an agentic RAG-style workflow rather than a single LLM call: the model reasons over the request, conditionally invokes specialized tools, observes their results, and then produces a grounded response.
-
-## Safety and data notes
-
-AI-generated plans can contain outdated prices, opening hours, weather, or travel requirements. Verify important details before booking. Rotate any API key that has been exposed and keep `.env` out of Git.
